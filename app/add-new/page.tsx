@@ -8,7 +8,7 @@ export const metadata = {
 }
 
 export default function AddNewPage(request: { searchParams: any}) {
-  const {error, message} = request.searchParams;
+  const {error, message, show_contribution_incentive_message} = request.searchParams;
 
   return (
     <>
@@ -16,7 +16,12 @@ export default function AddNewPage(request: { searchParams: any}) {
         Submit a framework
       </h1>
 
-      <div className="mb-32 text-center lg:text-left w-[80vw] max-w-2xl flex flex-col">
+      <div className="mb-32 text-center lg:text-left w-[80vw] max-w-2xl flex flex-col space-y-2">
+        {
+          show_contribution_incentive_message.includes("Enabled") && <div className='bg-blue-200 text-blue-800 p-2 w-full'>
+            Submit a framework to win a prize!
+          </div>
+        }
         {
           message && <div className='bg-green-200 text-green-800 p-2 w-full'>
             {message}

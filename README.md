@@ -1,7 +1,12 @@
-# Turso Nextjs Starter
+# A/B Testing at the edge with Turso, Next.js, and GrowthBook.
 
-This is a [Next.js] starter template that uses [Turso] to store data and
-[Tailwindcss] for styling.
+This is a [Next.js] project that uses [Turso] to store data and [Tailwindcss]
+for styling, set up with a loose authentication that only let's registered users
+contribure to the frameworks list.
+
+On this branch ([edge-ab-testing]), you'll find the code (yet to be merged to
+master) that implements the edge A/B testing setup for this project using Turso,
+Next.js, and GrowthBook.
 
 ## Getting Started
 
@@ -52,7 +57,8 @@ turso db shell web-frameworks
 
 ### Create tables and indexes
 
-Here's the SQL statement to create the `frameworks` table.
+Here's the SQL statement to create the `frameworks`, `users`, and
+`contributions` tables.
 
 ```sql
 -- create the "frameworks" table
@@ -61,18 +67,36 @@ create table frameworks (
   name varchar (50) not null,
   language varchar (50) not null,
   url text not null,
-  stars integer not null
+  stars integer not null,
+  created_at integer default (strftime('%s', 'now'))
+);
+
+create table users(
+  id varchar(100) primary key,
+  name varchar(100) not null,
+  email varchar(100) not null,
+  created_at integer default (strftime('%s', 'now'))
+);
+
+create table contributions(
+  id integer primary key,
+  framework_id integer not null,
+  user_id varchar(100) not null,
+  created_at integer default (strftime('%s', 'now'))
 );
 ```
 
 For unique column insertions, add accompanying unique indexes.
 
 ```sql
--- name column unique index
-create unique index idx_frameworks_name ON frameworks (name);
+-- frameworks name column unique index
+create unique index idx_frameworks_name no frameworks (name);
 
--- url column unique index
-create unique index idx_frameworks_url ON frameworks (url);
+-- frameworks url column unique index
+create unique index idx_frameworks_url on frameworks (url);
+
+-- users email column unique index
+create unique index idx_users_email on users(email);
 ```
 
 Seed the database with some data.
@@ -112,9 +136,9 @@ And, to create an authentication token for your database, run:
 turso db tokens create web-frameworks
 ```
 
-Add a `.env.local` file at the root of the project and inside it add the values
-obtained above as the database url and authentication token for your Turso
-database.
+In the `.env.local` file at the root of the project, populate the following
+variables adding the values obtained above as the database url and
+authentication token for the Turso database.
 
 ```
 NEXT_TURSO_DB_URL=
@@ -129,6 +153,7 @@ following resources:
 - [Next.js Documentation] - learn about Next.js features and API.
 - [Turso Documentation] - learn about Next.js features and API.
 - [Turso Community] - Join the Turso community.
+- [GrowthBook Documentation] - learn about GrowthBook's features and API.
 - [libSQL] - The open-source open-contribution fork of SQLite Turso is built on.
 
 ## Deploy on Vercel
@@ -136,14 +161,13 @@ following resources:
 The easiest way to deploy your Next.js app is to use the [Vercel Platform] from
 the creators of Next.js.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fturso-extended%2Fapp-turso-nextjs-starter&env=NEXT_TURSO_DB_URL,NEXT_TURSO_DB_AUTH_TOKEN&envDescription=To%20access%20the%20data%20stored%20inside%20your%20database%2C%20you%20need%20the%20Turso%20database%20URL%20and%20an%20authentication%20token.&envLink=https%3A%2F%2Fgithub.com%2Fturso-extended%2Fapp-turso-nextjs-starter%23set-up-turso-on-the-project&repository-name=turso-nextjs-starter&demo-title=Turso%20Nextjs%20Starter&demo-description=This%20is%20a%20Next.js%20starter%20template%20that%20uses%20Turso%20to%20store%20data%20and%20Tailwindcss%20for%20styling%2C%20deployed%20at%20the%20edge.&demo-url=https%3A%2F%2Fturso-nextjs-starter.vercel.app%2F)
-
 Check out the [Next.js deployment documentation] or [Turso's Vercel setup guide]
 for more details.
 
 [Next.js]: https://nextjs.org/
 [Turso]: https://turso.tech
 [Tailwindcss]: https://tailwindcss.com
+[edge-ab-testing]: https://github.com/turso-extended/ab-testing-turso-nextjs-growthbook/tree/edge-ab-testing
 [http://localhost:3000]: http://localhost:3000
 [`next/font`]: https://nextjs.org/docs/basic-features/font-optimization
 [Install the Turso CLI]:https://docs.turso.tech/reference/turso-cli#installation
@@ -151,6 +175,7 @@ for more details.
 [Turso Documentation]: https://docs.turso.tech/
 [Turso Community]: https://discord.com/invite/4B5D7hYwub
 [Learn Next.js]: https://nextjs.org/learn
+[GrowthBook Documentation]: https://docs.growthbook.io
 [libSQL]: https://github.com/libsql/libsql
 [Vercel Platform]: https://vercel.com/new
 [Next.js deployment documentation]: https://nextjs.org/docs/deployment

@@ -48,10 +48,24 @@ export async function POST(req: NextRequest) {
   });
 
   if(add.lastInsertRowid){
+    const contributions = await tursoClient.execute({
+      sql: "Select count(*) as total_contributions from contributions where user_id = ?",
+      args: [userId]
+    });
+
+    const previousSubmissions = contributions.rows[0]["total_contributions"];
+
     await tursoClient.execute({
       sql: "insert into contributions(framework_id, user_id) values(?, ?)",
       args: [add.lastInsertRowid, userId]
     })
+
+    if(!previousSubmissions){
+      // TODO: Trigger hupothesis supporting event on your real analytics tracking system
+      console.log("Made Contribution", {
+        userId: userId,
+      });
+    }
   }
 
   addNewUrl.searchParams.set("message", "Framework added")
